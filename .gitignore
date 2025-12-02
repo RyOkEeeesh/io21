@@ -1,0 +1,9 @@
+/.lgd-nfy0
+
+node_modules/
+
+.vscode/
+
+npm-debug.log*
+
+shared_data/*
