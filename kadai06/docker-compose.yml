@@ -5,19 +5,17 @@ services:
     volumes:
       - ./shared_data:/data
     restart: no
-
-  next:
-    build: ./next
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./shared_data:/data
-    restart: no
-
   wss:
     build: ./wss
     ports:
       - "3001:3001"
+    volumes:
+      - ./shared_data:/data
+    restart: no
+  next:
+    build: ./next
+    ports:
+      - "3000:3000"
     volumes:
       - ./shared_data:/data
     restart: no

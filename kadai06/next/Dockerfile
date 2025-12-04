@@ -1,20 +1,19 @@
-# Raspberry Pi でも動く軽量 Node.js
-FROM node:20-slim
-
-# 作業ディレクトリ
+# build
+FROM node:20 AS builder
 WORKDIR /app
-
-# 依存関係を先にコピーしてインストール
 COPY package*.json ./
 RUN npm install
-
-# プロジェクト全体をコピー
 COPY . .
+RUN npm run build
 
-# Next.js が /data を見れるように、docker-compose でボリュームをマウントする
+# runner
+FROM node:20 AS runner
+WORKDIR /app
+COPY package*.json ./
+RUN npm install --omit=dev
 
-# ポートを開放
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+
 EXPOSE 3000
-
-# 開発用コマンド
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "start"]

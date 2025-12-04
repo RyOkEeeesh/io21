@@ -36,7 +36,6 @@ def getData():
 def main():
     running = True
     def handler(signum, frame):
-        print('PY stoped')
         nonlocal running
         running = False
 
