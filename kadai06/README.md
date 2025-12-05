@@ -3,7 +3,7 @@
 - [システム構成](#システム構成)
 - [概要](#概要)
 - [セットアップ](#セットアップ)
-- [起動と停止、その他](#起動と停止、その他)
+- [起動と停止、削除](#起動と停止、削除)
 ## システム構成
 - [Docker](https://www.docker.com/ja-jp/ 'Docker Home')
 - [Next.js](https://nextjs.org/ 'Next.js Home')
@@ -19,15 +19,15 @@ config:
 ---
 flowchart LR
  subgraph shared_data["shared_data"]
-        CSV["CSV"]
+    CSV["CSV"]
   end
  subgraph Docker["Docker"]
     direction LR
-        shared_data
-        Python["Python"]
-        WSS["WSS"]
-        API["API"]
-        クライアント("クライアント")
+      shared_data
+      Python["Python"]
+      WSS["WSS"]
+      API["API"]
+      クライアント("クライアント")
   end
     Python -- 更新 --> CSV
     WSS -. 監視 .-> CSV
@@ -75,15 +75,15 @@ unzip kadai06.zip
 ```mermaid
 flowchart LR
  subgraph RaspberryPi["RaspberryPi"]
-        VCC["5V"]
-        GPIO["GPIO4"]
-        GND["GND"]
+    VCC["5V"]
+    GPIO["GPIO4"]
+    GND["GND"]
   end
  subgraph DHT11["DHT11"]
-        DHTV["VCC"]
-        DHTD["I/O"]
-        DHTN["NC"]
-        DHTG["GND"]
+    DHTV["VCC"]
+    DHTD["I/O"]
+    DHTN["NC"]
+    DHTG["GND"]
   end
     VCC --- Point1[" "]
     Point1 --- DHTV
@@ -101,7 +101,7 @@ cd kadai06
 docker compose build
 # ※ raspiだと10分くらいかかる
 ```
-## 起動と停止、その他
+## 起動と停止、削除
 ### 起動
 ログ表示あり
 ```bash
