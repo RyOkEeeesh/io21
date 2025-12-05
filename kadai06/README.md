@@ -111,6 +111,8 @@ docker compose up
 ```bash
 docker compose up -d
 ```
+> [!NOTE]
+> 起動後、`http://<Raspberry Pi の IP アドレス>:3000` にアクセス。
 ### 停止
 ```bash
 docker compose down
