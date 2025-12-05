@@ -56,7 +56,7 @@ sudo usermod -aG docker $USER
 # 確認
 docker compose version
 ```
-### GitHubからzipファイル取得
+### GitHub からzipファイル取得
 ```bash
 wget -L https://github.com/RyOkEeeesh/io21/releases/latest/download/kadai06.zip
 # zip解凍
@@ -95,7 +95,7 @@ flowchart LR
     Point1@{ shape: f-circ}
     Point2@{ shape: f-circ}
 ```
-### Dockerのビルド
+### Docker のビルド
 ```bash
 cd kadai06
 docker compose build
@@ -115,7 +115,7 @@ docker compose up -d
 ```bash
 docker compose down
 ```
-### Dockerの削除
+### 削除
 すべての不要なデータを削除
 ```bash
 docker system prune -af
