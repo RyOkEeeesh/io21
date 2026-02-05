@@ -5,6 +5,9 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import devServer from "@hono/vite-dev-server";
 
 export default defineConfig({
+  server: {
+    port: 8000
+  },
   plugins: [
     devServer({
       entry: "server.ts",

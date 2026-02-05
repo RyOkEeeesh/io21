@@ -6,3 +6,7 @@ node_modules/
 
 npm-debug.log*
 kadai06/shared_data/kadai06.csv
+
+./env
+kadai07/.env
+kadai07/app/credentials.json
