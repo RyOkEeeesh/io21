@@ -4,9 +4,11 @@ import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 import devServer from "@hono/vite-dev-server";
 
+const port = Number(process.env.APP_PORT) || 8000;
+
 export default defineConfig({
   server: {
-    port: 8000
+    port
   },
   plugins: [
     devServer({

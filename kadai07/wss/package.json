@@ -1,0 +1,10 @@
+{
+  "type": "module",
+  "dependencies": {
+    "chokidar": "^5.0.0",
+    "ws": "^8.18.3"
+  },
+  "scripts": {
+    "start": "node server.js"
+  }
+}

@@ -107,12 +107,11 @@ app.all("*", async (c) => {
         await import("virtual:react-router/server-build");
 
   const handler = createRequestHandler(build, process.env.NODE_ENV);
-  // HonoのContextからリクエストをReact Routerへ渡す
   return handler(c.req.raw);
 });
 
 if (process.env.NODE_ENV === "production") {
-  const port = 8000;
+  const port = Number(process.env.APP_PORT) || 8000
   console.log(`Server is running on http://localhost:${port}`);
   serve({ fetch: app.fetch, port });
 }
