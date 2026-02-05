@@ -1,29 +1,40 @@
 import { Welcome } from "@/welcome/welcome";
 import { client } from "@/lib/api";
+import { useLoaderData } from "react-router";
 
-export async function loader() {
-  // APIからhelloメッセージを取得
-  const helloRes = await client.api.hello.$get();
-  const helloData = await helloRes.json();
+export async function loader({ request }: { request: Request }) {
+  const headers = request.headers;
+  const eventRes = await client.api.calendar.$get({}, {
+    headers: {
+      cookie: headers.get("cookie") || "",
+    }
+  });
+
+  const eventData = await eventRes.json();
+  
+  if (!eventRes.ok || !eventData.success) {
+    console.error("API Error or Login needed:", eventData);
+    return { events: [] }; 
+  }
+
   return {
-    message: helloData.message
+    events: eventData.events || []
   };
 }
 
-export default function Home({ loaderData }: any) {
+
+export default function Home() {
+  const { events } = useLoaderData<typeof loader>();
+  console.log("クライアント側のイベント:", events);
+
   return (
     <div>
-      <h1>API Data: {loaderData.message}</h1>
-      
-      <h2>Upcoming Events:</h2>
+      <h2>予定一覧</h2>
       <ul>
-        {loaderData.events.map((event: any) => (
-          <li key={event.id}>
-            {event.start?.dateTime || event.start?.date} - {event.summary}
-          </li>
+        {events.map(event => (
+          <li key={event.id}>{event.summary}</li>
         ))}
       </ul>
-
       <Welcome />
     </div>
   );
