@@ -1,9 +1,11 @@
-import { Hono } from "hono";
-import { serve } from "@hono/node-server";
-import { serveStatic } from "@hono/node-server/serve-static";
-import { createRequestHandler } from "react-router";
-import { google } from "googleapis"; // 追加
-import { setCookie, getCookie } from "hono/cookie"; // 追加
+import { Hono } from 'hono';
+import { serve } from '@hono/node-server';
+import { serveStatic } from '@hono/node-server/serve-static';
+import { createRequestHandler } from 'react-router';
+import { google } from 'googleapis';
+import { setCookie, getCookie } from 'hono/cookie';
+import * as fs from 'fs/promises';
+import path from 'path';
 
 const app = new Hono();
 
@@ -11,7 +13,7 @@ const app = new Hono();
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 // ポートを8000にするなら、Googleコンソールの登録も8000に変更してください
-const REDIRECT_URI = "http://localhost:8000/auth/google/callback";
+const REDIRECT_URI = 'http://localhost:8000/auth/google/callback';
 
 const oauth2Client = new google.auth.OAuth2(
   CLIENT_ID,
@@ -21,35 +23,35 @@ const oauth2Client = new google.auth.OAuth2(
 
 // --- API定義 ---
 const routes = app
-  .get("/auth/google", (c) => {
+  .get('/auth/google', (c) => {
     const authUrl = oauth2Client.generateAuthUrl({
-      access_type: "offline",
+      access_type: 'offline',
       scope: [
-        "https://www.googleapis.com/auth/userinfo.profile",
-        "https://www.googleapis.com/auth/calendar.readonly",
+        'https://www.googleapis.com/auth/userinfo.profile',
+        'https://www.googleapis.com/auth/calendar.readonly',
       ],
-      prompt: "consent",
+      prompt: 'consent',
     });
     return c.redirect(authUrl);
   })
-  .get("/auth/google/callback", async (c) => {
-    const code = c.req.query("code");
-    if (!code) return c.text("No code found", 400);
+  .get('/auth/google/callback', async (c) => {
+    const code = c.req.query('code');
+    if (!code) return c.text('No code found', 400);
 
     try {
       const { tokens } = await oauth2Client.getToken(code);
-      setCookie(c, "google_tokens", JSON.stringify(tokens), {
-        path: "/",
+      setCookie(c, 'google_tokens', JSON.stringify(tokens), {
+        path: '/',
         httpOnly: true,
         maxAge: 60 * 60 * 24 * 7,
       });
-      return c.redirect("/");
+      return c.redirect('/');
     } catch (error) {
-      return c.text("Authentication failed", 500);
+      return c.text('Authentication failed', 500);
     }
   })
-  .get("/api/calendar", async (c) => {
-    const tokensJson = getCookie(c, "google_tokens");
+  .get('/api/calendar', async (c) => {
+    const tokensJson = getCookie(c, 'google_tokens');
     console.log(tokensJson);
 
     if (!tokensJson) return c.json({ need_login: true, success: false });
@@ -57,17 +59,17 @@ const routes = app
     try {
       const tokens = JSON.parse(tokensJson);
       oauth2Client.setCredentials(tokens);
-      const calendar = google.calendar({ version: "v3", auth: oauth2Client });
+      const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
       const response = await calendar.events.list({
-        calendarId: "primary",
+        calendarId: 'primary',
         timeMin: new Date().toISOString(),
         maxResults: 10,
         singleEvents: true,
-        orderBy: "startTime",
+        orderBy: 'startTime',
       });
 
-      console.log("Google API Response Status:", response.status); // 200ならOK
-      console.log(response.data)
+      console.log('Google API Response Status:', response.status); // 200ならOK
+      console.log(response.data.items)
 
       const events = response.data.items;
 
@@ -76,41 +78,49 @@ const routes = app
         events,
       });
     } catch (error) {
-      console.error("Google Calendar API Error:", error);
+      console.error('Google Calendar API Error:', error);
       return c.json({ success: false }, 500);
     }
+  })
+  .get('/api/temperature', async (c) => {
+    const CSV_PATH = path.join(process.env.DIR || '/data', process.env.FILE || 'kadai07.csv');
+    const fileContent = await fs.readFile(CSV_PATH, 'utf-8');
+    const lines = fileContent.split('\n').filter(line => line.trim() !== '');
+    if (lines.length <= 1) return c.json({ temperature: null, humidity: null });
+    const now = lines.slice(-1);
+    return c.json({temperature: now[1], humidity: now[2]});
   });
 
 export type AppType = typeof routes;
 
 // --- SSR / 静的ファイル処理 ---
 // (既存のコードと同じ)
-if (process.env.NODE_ENV === "production") {
-  app.use("/assets/*", serveStatic({ root: "./build/client" }));
+if (process.env.NODE_ENV === 'production') {
+  app.use('/assets/*', serveStatic({ root: './build/client' }));
 }
 
-app.all("*", async (c, next) => {
+app.all('*', async (c, next) => {
   const url = new URL(c.req.url);
   // .well-known や favicon など、React Routerで処理しなくていいものを除外
-  if (url.pathname.startsWith("/.well-known") || url.pathname === "/favicon.ico") {
-    return c.text("Not Found", 404);
+  if (url.pathname.startsWith('/.well-known') || url.pathname === '/favicon.ico') {
+    return c.text('Not Found', 404);
   }
   await next();
 });
 
-app.all("*", async (c) => {
+app.all('*', async (c) => {
   const build =
-    process.env.NODE_ENV === "production"
+    process.env.NODE_ENV === 'production'
       ? // @ts-ignore
-        await import("./build/server/index.js")
+      await import('./build/server/index.js')
       : // @ts-ignore
-        await import("virtual:react-router/server-build");
+      await import('virtual:react-router/server-build');
 
   const handler = createRequestHandler(build, process.env.NODE_ENV);
   return handler(c.req.raw);
 });
 
-if (process.env.NODE_ENV === "production") {
+if (process.env.NODE_ENV === 'production') {
   const port = Number(process.env.APP_PORT) || 8000
   console.log(`Server is running on http://localhost:${port}`);
   serve({ fetch: app.fetch, port });

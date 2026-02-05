@@ -5,7 +5,7 @@ services:
       - ./.env
     privileged: true
     volumes:
-      - ./shared_data:/data
+      - ./shared_data:${DIR}
     restart: no
   wss:
     build: ./wss
@@ -14,7 +14,7 @@ services:
     ports:
       - "${WSS_PORT}:${WSS_PORT}"
     volumes:
-      - ./shared_data:/data
+      - ./shared_data:${DIR}
     restart: no
   next:
     build: ./app
@@ -23,5 +23,5 @@ services:
     ports:
       - "${APP_PORT}:${APP_PORT}"
     volumes:
-      - ./shared_data:/data
+      - ./shared_data:${DIR}
     restart: no

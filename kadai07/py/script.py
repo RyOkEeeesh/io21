@@ -13,7 +13,7 @@ GPIO.setmode(GPIO.BCM)
 
 instance = dht11.DHT11(pin=4)
 
-LOG_FILE_PATH = os.environ["FILE"]
+LOG_FILE_PATH = os.path.join(os.environ["DIR"], os.environ["FILE"])
 
 def getResult():
     result = instance.read()

@@ -5,7 +5,7 @@ const port = Number(process.env.WSS_PORT) || 8001;
 
 const wss = new WebSocketServer({ port });
 
-const CSV_PATH = process.env.FILE;
+const CSV_PATH = `${process.env.DIR}/${process.env.FILE}`;
 
 const watcher = chokidar.watch(CSV_PATH, {
   pewrsistent: true,
